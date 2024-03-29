@@ -1,0 +1,37 @@
+Predictor,Round of 64,Round of 32,Sweet 16,Elite 8,Final Four,Championship,Sigcount
+Intercept,-14.43931,-3.43116,138.05881,4741.86,10532.063,-5133.21,6
+Wins,2.0015,1.85427,2.62091,304.11,0,115.21,5
+Win_Percentage,-47.92523,-45.13548,-86.43806,0,0,0,3
+O_Efficiency,0.31245,0.41934,0,0,0,0,2
+D_Efficiency,-0.61014,-0.88481,-1.856,0,0,0,3
+Power_Rating,0,0,-73.41475,0,0,0,1
+EFG_O,-0.78408,-0.25929,6.54543,1316.66,0,0,4
+EFG_D,1.49138,1.03421,1.16367,0,0,57.98,4
+Steal_Rate,-0.76835,-0.74077,0,-69.39,0,0,3
+Opp_Offensive_Rebound_Rate,0.28368,0.30349,0.71277,0,0,0,3
+X2_Pt_Percentage,0.48862,0,-4.11087,-1039.99,0,-53.72,4
+Wins_Above_Bubble,-0.45997,-0.91257,0,0,0,0,2
+Seed,1.16617,-1.35393,-48.94726,180.61,124.864,0,5
+Wins:Seed,-0.10371,0,0,0,0,0,1
+Win_Percentage:Seed,3.19652,0,0,0,0,0,1
+EFG_O:Seed,0.06154,0,-0.46302,0,0,0,2
+EFG_D:Seed,-0.11945,0,-0.30268,0,0,0,2
+Steal_Rate:Seed,0.05191,0,0,0,0,0,1
+X2_Pt_Percentage:Seed,-0.0431,0,0,0,0,0,1
+Opp_2_Pt_Percentage:Seed,0.06102,0,0,0,-48.087,0,2
+Turnover_Rate,0,-0.0369,-2.15229,0,-150.23,91.93,4
+Offensive Rebound Rate,0,0,0.6667,0,0,0,1
+Free_Throw_Rate,0,0,0,-55.46,-26.461,0,2
+Turnover_Rate:Seed,0,0.06373,0.96603,0,0,0,2
+X3_Pt_Percentage,0,0,-2.76866,-734.16,-145.274,0,3
+D_Efficiency:Seed,0,0,0.51793,0,0,0,1
+X64PD,0,-0.05951,0.08879,0,18.546,0,3
+Offensive_Rebound_Rate:Seed,0,0,0.25346,0,0,0,1
+X32PD,0,0,0.11886,0,29.621,0,2
+Opp_Offensive_Rebound_Rate:Seed,0,0,0,0,0,0,0
+Steal_Rate:Seed,0,0,0,0,0,0,0
+X2_Pt_Percentage:Seed,0,0,0.25346,0,0,0,1
+Power_Rating:Seed,0,0,22.55929,0,0,0,1
+X16PD,0,0,0,0,-18.328,0,1
+Seed:X64PD,0,0,0,0,-9.533,0,1
+Seed:X32PD,0,0,-0.03268,0,0,0,1
