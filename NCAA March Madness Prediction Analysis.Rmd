@@ -1,0 +1,1261 @@
+---
+title: "Final Paper"
+author: "STOR 320.01 Group 8"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(mlr)
+library(caret)
+library(MASS)
+library(gridExtra)
+library(kableExtra)
+library(htmltools)
+#Put Necessary Libraries Here
+```
+
+```{r, include=FALSE}
+data <- read.csv("key_data_set.csv")
+data 
+```
+
+```{r, include=FALSE}
+#Round 64 Data
+
+#create a training and testing dataset
+round64_data <- data[, 1:26]
+round64_data <- round64_data[, -which(colnames(round64_data) == "Elimination_Round")]
+round64_data <- round64_data[, -which(colnames(round64_data) == "Games")]
+# round64_data <- round64_data[, -which(colnames(round64_data) == "Wins")]
+round64_data <- round64_data[, -which(colnames(round64_data) == "Team")]
+round64_data <- round64_data[, -which(colnames(round64_data) == "Year")]
+round64_data <- round64_data[, -which(colnames(round64_data) == "Round.of.64")]
+```
+
+```{r, include=FALSE}
+#Round 32 Data
+
+round32_data <- data[, 1:29]
+round32_data <- round32_data[, -which(colnames(round32_data) == "Elimination_Round")]
+round32_data <- round32_data[, -which(colnames(round32_data) == "Games")]
+# round64_data <- round64_data[, -which(colnames(round64_data) == "Wins")]
+round32_data <- round32_data[, -which(colnames(round32_data) == "Team")]
+round32_data <- round32_data[, -which(colnames(round32_data) == "Year")] 
+round32_data <- round32_data[round32_data$X64WL == 1, ]
+round32_data <- round32_data[, -which(colnames(round32_data) == "X64WL")]
+```
+
+```{r, include=FALSE}
+#Round 16 Data
+
+round16_data <- data[, 1:32]
+round16_data <- round16_data[, -which(colnames(round16_data) == "Elimination_Round")]
+round16_data <- round16_data[, -which(colnames(round16_data) == "Games")]
+# round64_data <- round64_data[, -which(colnames(round64_data) == "Wins")]
+round16_data1 <- round16_data[, -which(colnames(round16_data) == "Team")]
+round16_data <- round16_data[, -which(colnames(round16_data) == "Year")]
+round16_data <- round16_data[round16_data$X64WL == 1, ]
+round16_data <- round16_data[round16_data$X32WL == 1, ]
+round16_data <- round16_data[, -which(colnames(round16_data) == "X64WL")]
+round16_data <- round16_data[, -which(colnames(round16_data) == "X32WL")]
+round16_data <- round16_data[complete.cases(round16_data), ]
+```
+
+```{r, include=FALSE}
+#Round 8 Data
+
+round8_data <- data[, 1:35]
+round8_data <- round8_data[, -which(colnames(round8_data) == "Elimination_Round")]
+round8_data <- round8_data[, -which(colnames(round8_data) == "Games")]
+# round64_data <- round64_data[, -which(colnames(round64_data) == "Wins")]
+round8_data <- round8_data[, -which(colnames(round8_data) == "Team")]
+round8_data <- round8_data[, -which(colnames(round8_data) == "Year")]
+round8_data <- round8_data[round8_data$X64WL == 1, ]
+round8_data <- round8_data[round8_data$X32WL == 1, ]
+round8_data <- round8_data[round8_data$X16WL == 1, ]
+round8_data <- round8_data[, -which(colnames(round8_data) == "X64WL")]
+round8_data <- round8_data[, -which(colnames(round8_data) == "X32WL")]
+round8_data <- round8_data[, -which(colnames(round8_data) == "X16WL")]
+round8_data <- round8_data[complete.cases(round8_data), ]
+```
+
+```{r,include=FALSE}
+#Round 4 Data
+
+round4_data <- data[, 1:38]
+round4_data <- round4_data[, -which(colnames(round4_data) == "Elimination_Round")]
+round4_data <- round4_data[, -which(colnames(round4_data) == "Games")]
+# round64_data <- round64_data[, -which(colnames(round64_data) == "Wins")]
+round4_data <- round4_data[, -which(colnames(round4_data) == "Team")]
+round4_data <- round4_data[, -which(colnames(round4_data) == "Year")]
+round4_data <- round4_data[round4_data$X64WL == 1, ]
+round4_data <- round4_data[round4_data$X32WL == 1, ]
+round4_data <- round4_data[round4_data$X16WL == 1, ]
+round4_data <- round4_data[round4_data$X8WL == 1, ]
+round4_data <- round4_data[, -which(colnames(round4_data) == "X64WL")]
+round4_data <- round4_data[, -which(colnames(round4_data) == "X32WL")]
+round4_data <- round4_data[, -which(colnames(round4_data) == "X16WL")]
+round4_data <- round4_data[, -which(colnames(round4_data) == "X8WL")]
+round4_data <- round4_data[complete.cases(round4_data), ]
+```
+
+```{r, include=FALSE}
+#Round 2 Data
+
+round2_data <- data[, 1:41]
+round2_data <- round2_data[, -which(colnames(round2_data) == "Elimination_Round")]
+round2_data <- round2_data[, -which(colnames(round2_data) == "Games")]
+# round64_data <- round64_data[, -which(colnames(round64_data) == "Wins")]
+round2_data <- round2_data[, -which(colnames(round2_data) == "Team")]
+round2_data <- round2_data[, -which(colnames(round2_data) == "Year")]
+round2_data <- round2_data[round2_data$X64WL == 1, ]
+round2_data <- round2_data[round2_data$X32WL == 1, ]
+round2_data <- round2_data[round2_data$X16WL == 1, ]
+round2_data <- round2_data[round2_data$X8WL == 1, ]
+round2_data <- round2_data[round2_data$X4WL == 1, ]
+round2_data <- round2_data[, -which(colnames(round2_data) == "X64WL")]
+round2_data <- round2_data[, -which(colnames(round2_data) == "X32WL")]
+round2_data <- round2_data[, -which(colnames(round2_data) == "X16WL")]
+round2_data <- round2_data[, -which(colnames(round2_data) == "X8WL")]
+round2_data <- round2_data[, -which(colnames(round2_data) == "X4WL")]
+round2_data <- round2_data[complete.cases(round2_data), ]
+```
+
+```{r, include=FALSE}
+
+round32_data$X32WL <- as.numeric(round32_data$X32WL)
+round32_data$X64PD <- as.numeric(round32_data$X64PD)
+
+
+round16_data$X16WL <- as.numeric(round16_data$X16WL)
+round16_data$X64PD <- as.numeric(round16_data$X64PD)
+round16_data$X32PD <- as.numeric(round16_data$X32PD)
+
+
+round8_data$X8WL <- as.numeric(round8_data$X8WL)
+round8_data$X64PD <- as.numeric(round8_data$X64PD)
+round8_data$X32PD <- as.numeric(round8_data$X32PD)
+round8_data$X16PD <- as.numeric(round8_data$X16PD)
+
+
+round4_data$X4WL <- as.numeric(round4_data$X4WL)
+round4_data$X64PD <- as.numeric(round4_data$X64PD)
+round4_data$X32PD <- as.numeric(round4_data$X32PD)
+round4_data$X16PD <- as.numeric(round4_data$X16PD)
+round4_data$X8PD <- as.numeric(round4_data$X8PD)
+
+
+round2_data$X2WL <- as.numeric(round2_data$X2WL)
+round2_data$X64PD <- as.numeric(round2_data$X64PD)
+round2_data$X32PD <- as.numeric(round2_data$X32PD)
+round2_data$X16PD <- as.numeric(round2_data$X16PD)
+round2_data$X8PD <- as.numeric(round2_data$X8PD)
+round2_data$X4PD <- as.numeric(round2_data$X4PD)
+```
+
+```{r, include=FALSE}
+#ROUND 64 -- FOR BOTH WITH AND WITHOUT XPD
+
+# Create the initial model
+initial_model <- glm(X64WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round64_data, family = "binomial")
+
+# Use stepAIC() to find the best model
+best_model_64 <- stepAIC(initial_model, direction = "both")
+
+```
+
+```{r, include=FALSE}
+#Round 64 CV  --- FOR BOTH WITH AND WITHOUT XPD
+
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round64_data))
+
+# set the number of folds for cross-validation
+num_folds <- 448
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round64_data)))
+
+WITH_PREDICTIONS_64=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round64_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round64_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X64WL) ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + 
+    EFG_O + EFG_D + Steal_Rate + Opp_Offensive_Rebound_Rate + 
+    X2_Pt_Percentage + Opp_2_Pt_Percentage + Wins_Above_Bubble + 
+    Seed + Wins:Seed + Win_Percentage:Seed + EFG_O:Seed + EFG_D:Seed + 
+    Steal_Rate:Seed + X2_Pt_Percentage:Seed + Opp_2_Pt_Percentage:Seed, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+  
+  # put the predictions into the predict vector
+  #predict_vector[fold_index == i] <- predictions
+
+    # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_64=rbind(WITH_PREDICTIONS_64,test_data)
+  
+  # put the updated test data back into the original data frame
+  #round64_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_64
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat64 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_64$predicted), as.factor(WITH_PREDICTIONS_64$X64WL)))
+confmat64
+
+#Create table with Sensitivity and Specificity
+r64 <- c(64)
+r64_sens <- confmat64$byClass["Sensitivity"]
+r64_spec <- confmat64$byClass["Specificity"]
+r64_acc <- confmat64$overall["Accuracy"]
+
+
+round_64 <- data.frame(Round = r64, Sensitivity = r64_sens, Specificity = r64_spec, Accuracy = r64_acc, row.names = NULL)
+round_64
+```
+
+```{r, include=FALSE}
+#ROUND 32 -- FOR WITHOUT X64PD
+
+# Create the initial model
+initial_model_32_1 <- glm(X32WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round32_data, family = "binomial")
+
+# Use stepAIC() to find the best model
+best_model_32_1 <- stepAIC(initial_model_32_1, direction = "both")
+```
+
+```{r, include=FALSE}
+#Round 32 CV -- FOR WITHOUT X64PD
+
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round32_data))
+
+# set the number of folds for cross-validation
+num_folds <- 224
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round32_data)))
+
+WITH_PREDICTIONS_32_1=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round32_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round32_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X32WL) ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + 
+    EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Opp_Offensive_Rebound_Rate + 
+    Wins_Above_Bubble + Seed + Wins:Seed + Turnover_Rate:Seed, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+
+    # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_32_1=rbind(WITH_PREDICTIONS_32_1,test_data)
+  
+  # put the updated test data back into the original data frame
+  #round32_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_32_1
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat32_1 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_32_1$predicted), as.factor(WITH_PREDICTIONS_32_1$X32WL)))
+confmat32_1
+
+#Create table with Sensitivity and Specificity
+r32_1 <- c(32)
+r32_1_sens <- confmat32_1$byClass["Sensitivity"]
+r32_1_spec <- confmat32_1$byClass["Specificity"]
+r32_1_acc <- confmat32_1$overall["Accuracy"]
+
+
+round_32_1 <- data.frame(Round = r32_1, Sensitivity = r32_1_sens, Specificity = r32_1_spec, Accuracy = r32_1_acc, row.names = NULL)
+round_32_1
+```
+
+
+```{r, include=FALSE}
+#ROUND 32 -- FOR WITH X64PD
+
+#make numeric vectors
+round32_data$X64PD = as.numeric(round32_data$X64PD)
+
+# Create the initial model
+initial_model_32_2 <- glm(X32WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + X64PD + X64PD*Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round32_data, family = "binomial")
+
+str(round32_data)
+
+# Use stepAIC() to find the best model
+best_model_32_2 <- stepAIC(initial_model_32_2, direction = "both")
+```
+
+```{r, include=FALSE}
+#Round 32 CV -- FOR WITH X64PD
+
+round32_data$X64PD = as.numeric(round32_data$X64PD)
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round32_data))
+
+# set the number of folds for cross-validation
+num_folds <- 224
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round32_data)))
+
+WITH_PREDICTIONS_32_2=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round32_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round32_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X32WL) ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + 
+    EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Opp_Offensive_Rebound_Rate + 
+    Wins_Above_Bubble + Seed + X64PD + Turnover_Rate:Seed, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+
+    # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_32_2=rbind(WITH_PREDICTIONS_32_2,test_data)
+  
+  # put the updated test data back into the original data frame
+  #round32_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_32_2
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat32_2 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_32_2$predicted), as.factor(WITH_PREDICTIONS_32_2$X32WL)))
+confmat32_2
+
+#Create table with Sensitivity and Specificity
+r32_2 <- c(32)
+r32_2_sens <- confmat32_2$byClass["Sensitivity"]
+r32_2_spec <- confmat32_2$byClass["Specificity"]
+r32_2_acc <- confmat32_2$overall["Accuracy"]
+
+
+round_32_2 <- data.frame(Round = r32_2, Sensitivity = r32_2_sens, Specificity = r32_2_spec, Accuracy = r32_2_acc, row.names = NULL)
+round_32_2
+```
+
+```{r, include=FALSE}
+#ROUND 16 -- FOR WITHOUT X64PD and X32PD
+
+initial_model_16_1 <- glm(X16WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round16_data, family = "binomial")
+
+# Use stepAIC() to find the best model
+best_model_16_1 <- stepAIC(initial_model_16_1, direction = "both")
+```
+
+```{r, include=FALSE}
+#Round 16 CV -- FOR WITHOUT X64PD and X32PD
+
+round16_data$X64PD = as.numeric(round16_data$X64PD)
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round16_data))
+
+# set the number of folds for cross-validation
+num_folds <- 112
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round16_data)))
+
+WITH_PREDICTIONS_16_1=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round16_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round16_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X16WL) ~ Wins + Win_Percentage + D_Efficiency + Power_Rating + 
+    EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + 
+    Opp_Offensive_Rebound_Rate + X2_Pt_Percentage + X3_Pt_Percentage + 
+    Seed + Wins:Seed + D_Efficiency:Seed + Power_Rating:Seed + 
+    EFG_O:Seed + EFG_D:Seed + Turnover_Rate:Seed + Steal_Rate:Seed + 
+    Offensive_Rebound_Rate:Seed + Opp_Offensive_Rebound_Rate:Seed + 
+    X2_Pt_Percentage:Seed, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+  
+  # put the predictions into the predict vector
+  predict_vector[fold_index == i] <- predictions
+
+    # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_16_1=rbind(WITH_PREDICTIONS_16_1,test_data)
+  
+  # put the updated test data back into the original data frame
+  #round16_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_16_1
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat16_1 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_16_1$predicted), as.factor(WITH_PREDICTIONS_16_1$X16WL)))
+confmat16_1
+
+#Create table with Sensitivity and Specificity
+r16_1 <- c(16)
+r16_1_sens <- confmat16_1$byClass["Sensitivity"]
+r16_1_spec <- confmat16_1$byClass["Specificity"]
+r16_1_acc <- confmat16_1$overall["Accuracy"]
+
+
+round_16_1 <- data.frame(Round = r16_1, Sensitivity = r16_1_sens, Specificity = r16_1_spec, Accuracy = r16_1_acc, row.names = NULL)
+round_16_1
+```
+
+```{r, include=FALSE}
+#ROUND 16 -- FOR WITH X64PD and X32PD
+
+initial_model_16_2 <- glm(X16WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + X64PD + X64PD*Seed + X32PD + X32PD*Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round16_data, family = "binomial")
+
+# Use stepAIC() to find the best model
+best_model_16_2 <- stepAIC(initial_model_16_2, direction = "both")
+```
+
+```{r, include=FALSE}
+#Round 16 CV -- FOR WITH X64PD and X32PD
+
+round16_data$X64PD = as.numeric(round16_data$X64PD)
+round16_data$X32PD = as.numeric(round16_data$X32PD)
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round16_data))
+
+# set the number of folds for cross-validation
+num_folds <- 112
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round16_data)))
+
+WITH_PREDICTIONS_16_2=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round16_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round16_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X16WL) ~ Wins + Win_Percentage + D_Efficiency + 
+    Power_Rating + EFG_O + EFG_D + Turnover_Rate + Offensive_Rebound_Rate + 
+    Opp_Offensive_Rebound_Rate + X2_Pt_Percentage + X3_Pt_Percentage + 
+    Seed + X64PD + X32PD + Seed:X32PD + D_Efficiency:Seed + Power_Rating:Seed + 
+    EFG_O:Seed + EFG_D:Seed + Turnover_Rate:Seed + Offensive_Rebound_Rate:Seed + 
+    X2_Pt_Percentage:Seed, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+  
+  # put the predictions into the predict vector
+  predict_vector[fold_index == i] <- predictions
+
+    # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_16_2=rbind(WITH_PREDICTIONS_16_2,test_data)
+  
+  # put the updated test data back into the original data frame
+  #round16_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_16_2
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat16_2 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_16_2$predicted), as.factor(WITH_PREDICTIONS_16_2$X16WL)))
+confmat16_2
+
+#Create table with Sensitivity and Specificity
+r16_2 <- c(16)
+r16_2_sens <- confmat16_2$byClass["Sensitivity"]
+r16_2_spec <- confmat16_2$byClass["Specificity"]
+r16_2_acc <- confmat16_2$overall["Accuracy"]
+
+
+round_16_2 <- data.frame(Round = r16_2, Sensitivity = r16_2_sens, Specificity = r16_2_spec, Accuracy = r16_2_acc, row.names = NULL)
+round_16_2
+```
+
+```{r, include=FALSE}
+#ROUND 8 -- FOR WITHOUT X64PD and X32PD and X16PD
+
+initial_model_8_1 <- glm(X8WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round8_data, family = "binomial")
+
+# Use stepAIC() to find the best model
+best_model_8_1 <- stepAIC(initial_model_8_1, direction = "both")
+```
+
+```{r, include=FALSE}
+summary(best_model_8_1)
+```
+
+```{r, include=FALSE}
+#Round 8 CV -- FOR WITHOUT X64PD and X32PD and X16PD
+
+round8_data$Conference = as.factor(round8_data$Conference)
+
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round8_data))
+
+# set the number of folds for cross-validation
+num_folds <- 56
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round8_data)))
+
+WITH_PREDICTIONS_8_1=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round8_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round8_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X8WL) ~ Wins + O_Efficiency + Turnover_Rate + Offensive_Rebound_Rate + 
+    Free_Throw_Rate + X2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+  
+  # put the predictions into the predict vector
+  predict_vector[fold_index == i] <- predictions
+
+    # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_8_1=rbind(WITH_PREDICTIONS_8_1,test_data)
+  
+  # put the updated test data back into the original data frame
+  #round8_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_8_1
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat8_1 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_8_1$predicted), as.factor(WITH_PREDICTIONS_8_1$X8WL)))
+confmat8_1
+
+#Create table with Sensitivity and Specificity
+r8_1 <- c(8)
+r8_1_sens <- confmat8_1$byClass["Sensitivity"]
+r8_1_spec <- confmat8_1$byClass["Specificity"]
+r8_1_acc <- confmat8_1$overall["Accuracy"]
+
+
+round_8_1 <- data.frame(Round = r8_1, Sensitivity = r8_1_sens, Specificity = r8_1_spec, Accuracy = r8_1_acc, row.names = NULL)
+round_8_1
+```
+
+```{r, include=FALSE}
+#ROUND 8 -- FOR WITH X64PD and X32PD and X16PD
+
+initial_model_8_2 <- glm(X8WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + X64PD + X64PD*Seed + X32PD + X32PD*Seed + X16PD + X16PD*Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round8_data, family = "binomial")
+
+# Use stepAIC() to find the best model
+best_model_8_2 <- stepAIC(initial_model_8_2, direction = "both")
+```
+
+```{r, include=FALSE}
+#Round 8 CV -- FOR WITH X64PD and X32PD and X16PD
+
+round8_data$Conference = as.factor(round8_data$Conference)
+
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round8_data))
+
+# set the number of folds for cross-validation
+num_folds <- 56
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round8_data)))
+
+WITH_PREDICTIONS_8=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round8_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round8_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X8WL) ~Wins + EFG_O + Steal_Rate + Free_Throw_Rate + X2_Pt_Percentage + 
+    X3_Pt_Percentage + Seed, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+  
+  # put the predictions into the predict vector
+  predict_vector[fold_index == i] <- predictions
+
+    # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_8=rbind(WITH_PREDICTIONS_8,test_data)
+  
+  # put the updated test data back into the original data frame
+  #round8_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_8
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat8_2 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_8$predicted), as.factor(WITH_PREDICTIONS_8$X8WL)))
+confmat8_2
+
+#Create table with Sensitivity and Specificity
+r8_2 <- c(8)
+r8_2_sens <- confmat8_2$byClass["Sensitivity"]
+r8_2_spec <- confmat8_2$byClass["Specificity"]
+r8_2_acc <- confmat8_2$overall["Accuracy"]
+
+
+round_8_2 <- data.frame(Round = r8_2, Sensitivity = r8_2_sens, Specificity = r8_2_spec, Accuracy = r8_2_acc, row.names = NULL)
+round_8_2
+```
+
+```{r, include=FALSE}
+#ROUND 4 -- FOR WITHOUT X64PD and X32PD and X16PD and X8PD
+
+initial_model_4_1 <- glm(X4WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round4_data, family = "binomial")
+
+# Use stepAIC() to find the best model
+best_model_4_1 <- stepAIC(initial_model_4_1, direction = "both")
+```
+
+```{r, include=FALSE}
+#ROUND 4 CV -- FOR WITHOUT X64PD and X32PD and X16PD and X8PD
+
+round4_data$Conference = as.factor(round4_data$Conference)
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round4_data))
+
+# set the number of folds for cross-validation
+num_folds <- 28
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round4_data)))
+
+WITH_PREDICTIONS_4_1=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round4_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round4_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X4WL) ~ D_Efficiency + EFG_O + EFG_D + Turnover_Rate + Offensive_Rebound_Rate + 
+    Seed + D_Efficiency:Seed + EFG_O:Seed + EFG_D:Seed, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+  
+  # put the predictions into the predict vector
+  predict_vector[fold_index == i] <- predictions
+
+  # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_4_1=rbind(WITH_PREDICTIONS_4_1,test_data)  
+  
+  # put the updated test data back into the original data frame
+  #round4_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_4_1
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat4_1 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_4_1$predicted), as.factor(WITH_PREDICTIONS_4_1$X4WL)))
+confmat4_1
+
+#Create table with Sensitivity and Specificity
+r4_1 <- c(4)
+r4_1_sens <- confmat4_1$byClass["Sensitivity"]
+r4_1_spec <- confmat4_1$byClass["Specificity"]
+r4_1_acc <- confmat4_1$overall["Accuracy"]
+
+
+round_4_1 <- data.frame(Round = r4_1, Sensitivity = r4_1_sens, Specificity = r4_1_spec, Accuracy = r4_1_acc, row.names = NULL)
+round_4_1
+```
+
+```{r, include=FALSE}
+#ROUND 4 -- FOR WITH X64PD and X32PD and X16PD and X8PD
+
+initial_model_4_2 <- glm(X4WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + X64PD + X64PD*Seed + X32PD + X32PD*Seed + X16PD + X16PD*Seed + X8PD + X8PD*Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round4_data, family = "binomial")
+
+# Use stepAIC() to find the best model
+best_model_4_2 <- stepAIC(initial_model_4_2, direction = "both")
+```
+
+```{r, include=FALSE}
+#Round 4 CV -- FOR WITH X64PD and X32PD and X16PD and X8PD
+
+round4_data$Conference = as.factor(round4_data$Conference)
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round4_data))
+
+# set the number of folds for cross-validation
+num_folds <- 28
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round4_data)))
+
+WITH_PREDICTIONS_4=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round4_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round4_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X4WL) ~ Turnover_Rate + Free_Throw_Rate + Opp_2_Pt_Percentage + 
+    X3_Pt_Percentage + Seed + X64PD + X32PD + X16PD + Seed:X64PD, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+  
+  # put the predictions into the predict vector
+  predict_vector[fold_index == i] <- predictions
+
+  # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_4=rbind(WITH_PREDICTIONS_4,test_data)  
+  
+  # put the updated test data back into the original data frame
+  #round4_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_4
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat4 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_4$predicted), as.factor(WITH_PREDICTIONS_4$X4WL)))
+confmat4
+
+#Create table with Sensitivity and Specificity
+r4 <- c(4)
+r4_sens <- confmat4$byClass["Sensitivity"]
+r4_spec <- confmat4$byClass["Specificity"]
+r4_acc <- confmat4$overall["Accuracy"]
+
+
+round_4 <- data.frame(Round = r4, Sensitivity = r4_sens, Specificity = r4_spec, Accuracy = r4_acc, row.names = NULL)
+round_4
+```
+
+```{r, include=FALSE}
+#ROUND 2 -- FOR WITHOUT X64PD and X32PD and X16PD and X8PD and X4PD
+
+initial_model_2_1 <- glm(X2WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round2_data, family = "binomial")
+
+# Use stepAIC() to find the best model
+best_model_2_1 <- stepAIC(initial_model_2_1, direction = "both")
+```
+
+```{r, include=FALSE}
+#Round 2 CV -- FOR WITHOUT X64PD and X32PD and X16PD and X8PD and X4PD
+
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round2_data))
+
+# set the number of folds for cross-validation
+num_folds <- 14
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round2_data)))
+
+WITH_PREDICTIONS_2_1=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round2_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round2_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X2WL) ~ Wins + EFG_D + Turnover_Rate + X2_Pt_Percentage, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+  
+  # put the predictions into the predict vector
+  predict_vector[fold_index == i] <- predictions
+
+  # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_2_1=rbind(WITH_PREDICTIONS_2_1,test_data)    
+  
+  # put the updated test data back into the original data frame
+  #round2_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_2_1
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat2_1 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_2_1$predicted), as.factor(WITH_PREDICTIONS_2_1$X2WL)))
+confmat2_1
+
+#Create table with Sensitivity and Specificity
+r2_1 <- c(2)
+r2_1_sens <- confmat2_1$byClass["Sensitivity"]
+r2_1_spec <- confmat2_1$byClass["Specificity"]
+r2_1_acc <- confmat2_1$overall["Accuracy"]
+
+
+round_2_1 <- data.frame(Round = r2_1, Sensitivity = r2_1_sens, Specificity = r2_1_spec, Accuracy = r2_1_acc, row.names = NULL)
+round_2_1
+```
+
+```{r, include=FALSE}
+#ROUND 2 -- FOR WITH X64PD and X32PD and X16PD and X8PD and X4PD
+
+initial_model_2_2 <- glm(X2WL ~ Wins + Win_Percentage + O_Efficiency + D_Efficiency + Power_Rating +EFG_O + EFG_D + Turnover_Rate + Steal_Rate + Offensive_Rebound_Rate + Opp_Offensive_Rebound_Rate + Free_Throw_Rate + X2_Pt_Percentage + Opp_2_Pt_Percentage + X3_Pt_Percentage + Wins_Above_Bubble + Seed + X64PD + X64PD*Seed + X32PD + X32PD*Seed + X16PD + X16PD*Seed + X8PD + X8PD*Seed + X4PD + X4PD*Seed + Wins*Seed + Win_Percentage*Seed + O_Efficiency*Seed + D_Efficiency*Seed + Power_Rating*Seed + EFG_O*Seed + EFG_D*Seed + Turnover_Rate*Seed + Steal_Rate*Seed + Offensive_Rebound_Rate*Seed + Opp_Offensive_Rebound_Rate*Seed + Free_Throw_Rate*Seed + X2_Pt_Percentage*Seed + Opp_2_Pt_Percentage*Seed + X3_Pt_Percentage*Seed + Wins_Above_Bubble*Seed, data = round2_data, family = "binomial")
+
+# Use stepAIC() to find the best model
+best_model_2_2 <- stepAIC(initial_model_2_2, direction = "both")
+```
+
+```{r, include=FALSE}
+#Round 2 CV -- FOR WITH X64PD and X32PD and X16PD and X8PD and X4PD
+
+# create a vector to store the predictions
+predict_vector <- rep(NA, nrow(round2_data))
+
+# set the number of folds for cross-validation
+num_folds <- 14
+
+# set the seed for reproducibility
+set.seed(123)
+
+# create an index vector to split the data into folds
+fold_index <- sample(rep(1:num_folds, length.out = nrow(round2_data)))
+
+WITH_PREDICTIONS_2_2=NULL
+
+# loop over the folds
+for (i in 1:num_folds) {
+  # get the test data for this fold
+  test_data <- round2_data[fold_index == i, ]
+  
+  # get the training data for this fold
+  train_data <- round2_data[fold_index != i, ]
+  
+  # fit the glm model to the training data
+  fit <- glm(as.numeric(X2WL) ~ Wins + EFG_D + Turnover_Rate + X2_Pt_Percentage, data = train_data, family = binomial)
+  
+  # make predictions for the test data
+  predictions <- predict(fit, newdata = test_data, type = "response")
+  
+  # put the predictions into the predict vector
+  predict_vector[fold_index == i] <- predictions
+
+  # add the predicted values as a new column in the test data
+  test_data$predicted <- ifelse(predictions >= 0.5, 1, 0)
+  
+  WITH_PREDICTIONS_2_2=rbind(WITH_PREDICTIONS_2_2,test_data)    
+  
+  # put the updated test data back into the original data frame
+  #round2_data[fold_index == i, ] <- test_data
+}
+WITH_PREDICTIONS_2_2
+
+#Create a confusion matrix to get the accuracy, sensitivity, and specificity
+confmat2_2 <- confusionMatrix(table(as.factor(WITH_PREDICTIONS_2_2$predicted), as.factor(WITH_PREDICTIONS_2_2$X2WL)))
+confmat2_2
+
+#Create table with Sensitivity and Specificity
+r2_2 <- c(2)
+r2_2_sens <- confmat2_2$byClass["Sensitivity"]
+r2_2_spec <- confmat2_2$byClass["Specificity"]
+r2_2_acc <- confmat2_2$overall["Accuracy"]
+
+
+round_2_2 <- data.frame(Round = r2_2, Sensitivity = r2_2_sens, Specificity = r2_2_spec, Accuracy = r2_2_acc, row.names = NULL)
+round_2_2
+```
+
+```{r, include=FALSE}
+#Merge tables for sensitivity, specificity and accuracy for PD and no PD
+sens_spec.no_PD <- rbind(round_64, round_32_1, round_16_1, round_8_1, round_4_1, round_2_1)
+sens_spec.with_PD <- rbind(round_64, round_32_2, round_16_2, round_8_2, round_4, round_2_2)
+
+sens_spec.no_PD
+sens_spec.with_PD
+```
+
+```{r, include=FALSE}
+#Nicer tables for sensitivity, specificity and accuracy
+no.PD_nicer <- kable(sens_spec.no_PD, "html") %>%
+  kable_styling(full_width = FALSE, position = "center", latex_options = c("striped", "scale_down"), font_size = 12)
+
+with.PD_nicer <- kable(sens_spec.with_PD, "html") %>%
+  kable_styling(full_width = FALSE, position = "center", latex_options = c("striped", "scale_down"), font_size = 12)
+
+no.PD_nicer
+with.PD_nicer
+```
+
+```{r, include=FALSE}
+#Graphs
+no.PD_plot <- ggplot(sens_spec.no_PD, aes(x = Round)) +
+  geom_line(aes(y = Accuracy, color = "Accuracy")) +
+  geom_line(aes(y = Sensitivity, color = "Sensitivity")) +
+  geom_line(aes(y = Specificity, color = "Specificity")) +
+  scale_color_manual(values = c("Accuracy" = "blue", "Sensitivity" = "red", "Specificity" = "#006000")) +
+  labs(x = "Round", y = "Value") + scale_x_continuous(breaks = sens_spec.no_PD$Round, trans = "reverse") +
+  ggtitle("Change in Accuracy, Sensitivity and Specificity Over Each Round (No XPD)")
+
+
+with.PD_plot <- ggplot(sens_spec.with_PD, aes(x = Round, y = Accuracy)) +
+  geom_line(aes(color = "Accuracy")) +
+  geom_line(aes(x = Round, y = Sensitivity, color = "Sensitivity")) +
+  geom_line(aes(x = Round, y = Specificity, color = "Specificity")) +
+  scale_color_manual(values = c("Accuracy" = "blue", "Sensitivity" = "red", "Specificity" = "#006000")) +
+  labs(x = "Round", y = "Value") + scale_x_continuous(breaks = sens_spec.with_PD$Round, trans = "reverse") +
+  ggtitle("Change in Accuracy, Sensitivity and Specificity Over Each Round (With XPD)") 
+
+grid.arrange(no.PD_plot, with.PD_plot)
+```
+
+```{r, include=FALSE}
+predictionweight <- read.csv("predictionwithpd.csv")
+
+gathereddata <- predictionweight %>% arrange(desc(Sigcount)) %>% slice(2:nrow(predictionweight)) %>% gather(key = "Round", value = "Accuracy", 2:7, factor_key=T) 
+
+gathereddata$logAccuracy = log(abs(gathereddata$Accuracy))
+
+gathereddatanew = gathereddata %>% mutate(
+  Predictor = ifelse(Predictor == "D_Efficiency:Seed", "Defensive Efficiency:Seed", ifelse(Predictor == "D_Efficiency", "Defensive Efficiency", ifelse(Predictor == "EFG_D", "Effective FG Percentage Allowed", ifelse(Predictor == "EFG_D:Seed", "Effective FG Percentage Allowed:Seed", ifelse(Predictor == "EFG_O", "Effective FG Percentage", ifelse(Predictor =="EFG_O:Seed", "Effective FG Percentage:Seed", ifelse(Predictor == "Free_Throw_Rate", "Free Throw Rate", ifelse(Predictor == "O_Efficiency", "Offensive Efficiency", ifelse(Predictor == "Offensive_Rebound_Rate:Seed", "Offensive Rebound Rate:Seed", ifelse(Predictor == "Opp_2_Pt_Percentage:Seed", "Opp 2pt Percentage:Seed", ifelse(Predictor == "Opp_Offensive_Rebound_Rate", "Opp Offensive Rebound Rate", ifelse(Predictor == "Opp_Offensive_Rebound_Rate:Seed", "Opp Offensive Rebound Rate:Seed", ifelse(Predictor == "Power_Rating", "Power Rating", ifelse(Predictor == "Power_Rating:Seed", "Power Rating:Seed", ifelse(Predictor == "Steal_Rate", "Steal Rate", ifelse(Predictor == "Steal_Rate:Seed", "Steal Rate:Seed", ifelse(Predictor == "Turnover_Rate", "Turnover Rate", ifelse(Predictor == "Turnover_Rate:Seed", "Turnover Rate:Seed", ifelse(Predictor == "Win_Percentage", "Win Percentage", ifelse(Predictor == "Win_Percentage:Seed", "Win Percentage:Seed", ifelse(Predictor == "Wins_Above_Bubble", "Wins Above Bubble", ifelse(Predictor == "X2_Pt_Percentage", "2pt Percentage", ifelse(Predictor == "X2_Pt_Percentage:Seed", "2pt Percentage:Seed", ifelse(Predictor == "X3_Pt_Percentage", "3pt Percentage", ifelse(Predictor == "X64PD", "Round of 64 PD", ifelse(Predictor == "X32PD", "Round of 32 PD", ifelse(Predictor == "X16PD", "Sweet 16 PD", ifelse(Predictor == "Seed:X64PD", "Round of 64 PD:Seed", ifelse(Predictor == "Seed:X32PD", "Round of 32 PD:Seed", ifelse(Predictor == "Wins", "Wins", ifelse(Predictor == "Seed", "Seed", ifelse(Predictor == "Offensive Rebound Rate", "Offensive Rebound Rate", ifelse(Predictor == "Wins:Seed", "Wins:Seed", Predictor))))))))))))))))))))))))))))))))))
+  
+
+  
+#factor variable in order to reorganize
+gathereddatanew$Predictor <- factor(gathereddatanew$Predictor, levels = c("Defensive Efficiency", "Defensive Efficiency:Seed", "Effective FG Percentage Allowed", "Effective FG Percentage Allowed:Seed", "Effective FG Percentage", "Effective FG Percentage:Seed", "Free Throw Rate", "Offensive Efficiency", "Offensive Rebound Rate", "Offensive Rebound Rate:Seed", "Opp 2pt Percentage:Seed", "Opp Offensive Rebound Rate", "Opp Offensive Rebound Rate:Seed", "Power Rating", "Power Rating:Seed", "Seed", "Steal Rate", "Steal Rate:Seed", "Turnover Rate", "Turnover Rate:Seed", "Win Percentage", "Win Percentage:Seed", "Wins", "Wins:Seed", "Wins Above Bubble", "2pt Percentage", "2pt Percentage:Seed", "3pt Percentage", "Round of 64 PD", "Round of 32 PD", "Sweet 16 PD", "Round of 64 PD:Seed", "Round of 32 PD:Seed"))
+# create the plot
+gathereddatanew %>% ggplot(aes(x = Predictor, y = Round, fill = logAccuracy)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "lightblue", mid = "blue", high = "darkblue", na.value = "white", midpoint = 0, guide = "colorbar", aesthetics = "fill") +
+  xlab("Predictors") +
+  ylab("Models") +
+  ggtitle("Tile Chart of Predictor Values by Model") +
+  labs(fill = "Log Value") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+```
+
+```{r, include=FALSE}
+predictionweight2 <- read.csv("predictionwithoutpd2.csv")
+gathereddata2 <- predictionweight2 %>% arrange(desc(Sigcount)) %>% slice(c(2:nrow(predictionweight2))) %>% gather(key = "Round", value = "Accuracy", 2:7, factor_key=T)
+
+gathereddata2$logAccuracy = log(abs(gathereddata2$Accuracy))
+
+gathereddata2new = gathereddata2 %>% mutate(
+  Predictor = ifelse(Predictor == "D_Efficiency:Seed", "Defensive Efficiency:Seed", ifelse(Predictor == "D_Efficiency", "Defensive Efficiency", ifelse(Predictor == "EFG_D", "Effective FG Percentage Allowed", ifelse(Predictor == "EFG_D:Seed", "Effective FG Percentage Allowed:Seed", ifelse(Predictor == "EFG_O", "Effective FG Percentage", ifelse(Predictor =="EFG_O:Seed", "Effective FG Percentage:Seed", ifelse(Predictor == "Free_Throw_Rate", "Free Throw Rate", ifelse(Predictor == "O_Efficiency", "Offensive Efficiency", ifelse(Predictor == "Offensive_Rebound_Rate:Seed", "Offensive Rebound Rate:Seed", ifelse(Predictor == "Opp_2_Pt_Percentage:Seed", "Opp 2pt Percentage:Seed", ifelse(Predictor == "Opp_Offensive_Rebound_Rate", "Opp Offensive Rebound Rate", ifelse(Predictor == "Opp_Offensive_Rebound_Rate:Seed", "Opp Offensive Rebound Rate:Seed", ifelse(Predictor == "Power_Rating", "Power Rating", ifelse(Predictor == "Power_Rating:Seed", "Power Rating:Seed", ifelse(Predictor == "Steal_Rate", "Steal Rate", ifelse(Predictor == "Steal_Rate:Seed", "Steal Rate:Seed", ifelse(Predictor == "Turnover_Rate", "Turnover Rate", ifelse(Predictor == "Turnover_Rate:Seed", "Turnover Rate:Seed", ifelse(Predictor == "Win_Percentage", "Win Percentage", ifelse(Predictor == "Win_Percentage:Seed", "Win Percentage:Seed", ifelse(Predictor == "Wins_Above_Bubble", "Wins Above Bubble", ifelse(Predictor == "X2_Pt_Percentage", "2pt Percentage", ifelse(Predictor == "X2_Pt_Percentage:Seed", "2pt Percentage:Seed", ifelse(Predictor == "X3_Pt_Percentage", "3pt Percentage", ifelse(Predictor == "X64PD", "Round of 64 PD", ifelse(Predictor == "X32PD", "Round of 32 PD", ifelse(Predictor == "X16PD", "Sweet 16 PD", ifelse(Predictor == "Seed:X64PD", "Round of 64 PD:Seed", ifelse(Predictor == "Seed:X32PD", "Round of 32 PD:Seed", ifelse(Predictor == "Wins", "Wins", ifelse(Predictor == "Seed", "Seed", ifelse(Predictor == "Offensive Rebound Rate", "Offensive Rebound Rate", ifelse(Predictor == "Wins:Seed", "Wins:Seed", Predictor))))))))))))))))))))))))))))))))))
+
+# create the plot
+gathereddata2new %>% ggplot(aes(x = Predictor, y = Round, fill = logAccuracy)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "lightblue", mid = "blue", high = "darkblue", na.value = "white", midpoint = 0, guide = "colorbar", aesthetics = "fill") +
+  xlab("Predictors") +
+  ylab("Models") +
+  ggtitle("Tile Chart of Predictor Values by Model") +
+  labs(fill = "Log Value") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
+```{r, include=FALSE}
+data <- read.csv("key_data_set.csv")
+data2 <- data %>% mutate('Win Percentage' = Win_Percentage,'Defensive Efficiency' = D_Efficiency,'Round of 64 Opponent' = Round.of.64, 'Round of 64 W or L' = X64WL, 'Round of 64 PD' = X64PD, 'Round of 32 Opponent' = Round.of.32, 'Round of 32 W or L' = X32WL, 'Round of 32 PD' = X32PD) %>% dplyr::select(Team, Year, Conference, 'Win Percentage', 'Defensive Efficiency', Seed, 'Round of 64 Opponent', 'Round of 64 W or L', 'Round of 64 PD', 'Round of 32 Opponent', 'Round of 32 W or L', 'Round of 32 PD') %>% arrange(Year) %>% head(10)
+
+nicetable <-kable(data2, "html") %>%
+  kable_styling(full_width = FALSE, position = "center", latex_options = c("striped", "scale_down"), font_size = 12) 
+
+
+nicetable
+
+```
+
+```{r, include=FALSE}
+sigcountdata <- read.csv("predictionwithoutpd2.csv")
+sigcountdata <- sigcountdata %>% slice(2:nrow(sigcountdata)) %>% arrange(desc(Sigcount)) 
+
+
+  sigcountdata %>% ggplot(mapping = aes(x = reorder(Predictor, -Sigcount), y = Sigcount)) + 
+  geom_bar(stat = "identity", fill = 'lightblue') + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + labs(title = "Number of Rounds Predictor Was Used in Model", x = "Predictor", y = "Number of Rounds")
+    
+sigcountdata
+```
+
+
+# INTRODUCTION
+
+After a historic run to the championship in 2022, and four out of five starters returning, the nation expected nothing less than seeing Tar Heel blue back in the finals of the 2023 March Madness tournament. Fast forward a year to the end of another historic Carolina season – but not in a way that anyone saw coming. After beginning the season ranked number one in the nation, the Tar Heels became the first team since the NCAA’s expansion to a 64 team tournament to miss the tournament altogether. Being undergraduate students at The University of North Carolina at Chapel Hill, where basketball holds significant cultural, social, and school value, we could not believe that our season ended so abruptly. In addition to the sadness that spread like wildfire around campus, we could not help the confusion that we simultaneously felt. There had to be a logical reason to support why a team that returned a large percentage of its scoring, defense, and player minutes would have such a different outcome from the year just prior. Desperate for an answer to this confusion, our group found a NCAA dataset that had the potential to allow us conquer the “Madness” and predict the unpredictable.
+  
+While the pain we endured this year as Tar Heels was truly unique, March takes a toll on millions of individuals every year. With the chances of becoming the first person to ever predict the outcome of all 63 NCAA tournament games, win enormous cash prizes, the potential to see their team win it all, and ultimate bragging rights, March continues to provide hope to all those who take the time to fill out their brackets. However, despite the hundreds of millions who have participated, not a single person has ever fully succeeded. Present day researchers have developed models that take into account various factors such as team statistics, individual performances, and coaching strategies. By incorporating these variables into models and analyzing their impact on overall performance, researchers aim to generate more accurate predictions. While a perfect bracket may remain intangible, the use of data and statistical analysis can provide valuable insights into the underlying factors that contribute to the excitement and unpredictability of March Madness, benefiting both analysts and fans alike.
+	
+In our own efforts to tackle the challenge of better understanding and predicting the NCAA Division 1 men’s basketball tournament success, we developed a two-part approach. Firstly, we asked if it would be possible to create a round by round model that accurately predicts whether each team in the NCAA Division I men’s basketball tournament should win or lose solely using each team’s regular season statistics. This question carries significant importance since these common statistics related to team performance are the key factors and are primarily accessible to both analysts and fans while creating their brackets. As a second step, we sought to enhance the accuracy of our model by incorporating the previous round's point differential of each game played in each round. This inquiry allowed us to investigate whether a team's performance in the tournament can serve as an indicator of their success in future rounds. By taking into account this aspect, we can determine if our model becomes more accurate than merely relying on regular season statistics.
+
+# DATA
+
+Our group began the project by analyzing the NCAA basketball tournament data from 2013 to 2019. The initial dataset chosen was the public dataset “College Basketball Dataset,” which was scraped from a sports blog and cleaned by Andrew Sunberg, who also added three variables (Post Season, Seed, and Year), and then posted it on Kaggle. The downloaded dataset consisted of 22 numeric variables associated with regular season statistics, along with three categorical variables: Team, Conference, and Post Season. Initially, the dataset included regular season statistics for all Division 1 basketball teams between 2013 and 2019, resulting in 2,456 rows. Furthermore, each row corresponded to the statistics of a specific team in a given year.
+
+The original dataset included three categorical variables: Team Name, Athletic Conference, and the Year of the tournament, ranging from 2013 to 2019. The 22 numeric variables gave us regular season statistics of each team, ranging from offensive and defensive variables to multifaceted (but still important) variables. Offensive variables, such as adjusted offensive efficiency (the number of points scored per 100 possessions), effective field goal percentage, turnover rate, offensive rebound rate, free throw rate, two-point shooting percentage, and three-point shooting percentage, initially helped us gather information regarding a team’s offensive abilities. Defensive variables, such as adjusted defensive efficiency (the number of points given up per 100 possessions), effective field goal percentage allowed, steal rate, allowed offensive rebound rate, allowed free throw rate, allowed two-point shooting percentage, and allowed three-point shooting percentage, enabled us to gather information regarding a team’s defensive abilities. Other multifaceted variables, such as a team’s tournament seed, number of games played, number of games won, power rating (the chance of beating an average team in the tournament), adjusted tempo (possessions per 40 minutes), wins above the bubble, and postseason (the round where the given team was eliminated), gave us a broader picture of overall team success going into the tournament.
+
+To improve the dataset's usefulness for our analysis, we first filtered it to include only teams that made it to the Round of 64. We achieved this by filtering the dataset using the "Elimination Round" variable, which resulted in including only teams that had elimination rounds equal to "R64" (Round of 64), "R32" (Round of 32), "S16" (Sweet Sixteen), "E8" (Elite Eight), "F4" (Final Four), "2nd" (Runner-Up), and "Champions." Following this cleanup, the number of teams in the dataset reduced from 2,456 to 448, representing all 64 teams in each of the seven years. In addition, we created a variable called “Win Percentage” that calculated the percentage of games each team won in the regular season, while removing the  “Adjusted Tempo” variable. The decision to remove this variable came after we deemed the variable unimportant in predicting a team’s overall tournament success.
+
+While we had a total of 41 variables in our merged dataset, here is a sample of our overall dataset:
+
+```{r, echo=FALSE}
+data <- read.csv("key_data_set.csv")
+data2 <- data %>% mutate('Win Percentage' = Win_Percentage,'Defensive Efficiency' = D_Efficiency,'Round of 64 Opponent' = Round.of.64, 'Round of 64 W or L' = X64WL, 'Round of 64 PD' = X64PD, 'Round of 32 Opponent' = Round.of.32, 'Round of 32 W or L' = X32WL, 'Round of 32 PD' = X32PD) %>% dplyr::select(Team, Year, Conference, 'Win Percentage', 'Defensive Efficiency', Seed, 'Round of 64 Opponent', 'Round of 64 W or L', 'Round of 64 PD', 'Round of 32 Opponent', 'Round of 32 W or L', 'Round of 32 PD') %>% arrange(Year) %>% head(10)
+
+nicetable <-kable(data2, "html") %>%
+  kable_styling(full_width = FALSE, position = "center", latex_options = c("striped", "scale_down"), font_size = 12) 
+
+
+nicetable
+
+```
+
+Given that our data only provided regular season statistics, we initially had no no binary variable that stated whether a team won or lost in a given round, which would be needed for predicting tournament success in any sort of generalized linear model. In addition, our dataset had no post season data that could be incorporated into a later model. Therefore, we began searching databases for another dataset that included such information, which could be merged with our current dataset. However, there were no publicly available datasets with this information, so we decided to enter it manually. We created a new Excel file with 19 columns and 448 rows (one row for each of the 64 teams over the seven year span). Not including columns with both the team’s name and the tournament year, we had 17 columns, 6 of which were the name of team’s opponent in every given round, 6 of which were binary columns that stated whether each given team won the individual round, and 5 of which were columns with post season statistics that stated the winning team’s point differential in that game.  All data in this dataset was created using information found from the NCAA’s official bracketology website. After taking the time to manually enter 8,512 pieces of individual data into our “Post Season” dataset, we saved the dataset as a csv. file and read it into R. Next, we merged this post season dataset with our initially downloaded college basketball dataset by Team and Year, resulting in a more complete picture of the team’s performance throughout the year as well as in the tournament. Additionally, we now had the binary variables that would be needed to build generalized linear models that provided round by round predictions of a team's success in each tournament.
+
+As we will discuss in the results section, we used a round by round cross validation technique on each variable in our StepAIC process. While the process ran smoothly for the majority of the rounds, we were presented with errors that led our group to realize that the Conference variable was the source of trouble. Due to our round by round approach, the number of teams decreased by half in addition to the number of teams representing their conferences in each of the following rounds. Because cross-validation requires at least two subsets of data to be meaningful, one for training the model and one for evaluating its performance, the low representation of some conferences in later rounds provided difficulty. We had the initial idea to group smaller conferences in one larger conference, but the problem proved to be unavoidable when even select teams represented entire power five conferences in later tournament rounds. Unfortunately, given our prediction techniques, we were led to remove the “Conference” variable from our generalized linear model altogether. While not ideal, this was not extremely detrimental to our model, because this metric of quality is also represented by the variables Seed, Power Rating, and Wins Above Bubble.
+
+After removing the Conference variable, the figure below shows how the variables in the dataset factored into the initial predictive models that were created and will be further discussed in the results section.
+
+
+```{r, include=FALSE, fig.align='center'}
+sigcountdata <- read.csv("predictionwithoutpd2.csv") 
+sigcountdata %>% slice(2:nrow(sigcountdata)) %>% ggplot(mapping = aes(x = reorder(Predictor, -Sigcount), y = Sigcount)) + 
+geom_bar(stat = "identity", fill = 'lightblue') + 
+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + labs(title = "Number of Rounds Predictor Was Used in Model", x = "Predictor", y = "Number of Rounds")
+
+#Adding renamed variables
+renamed <- c("Intercept", "Wins", "Win Percentage", "Offensive Efficiency", "Defensive Efficiency", "Power Rating", "Effective Field Goal", "Opp Field Goal", "Steal Rate", "Opponent Offensive Rebound Rate", "2 Point Percentage", "Wins Above Bubble", "Seed", "Wins * Seed", "Win Percentage * Seed", "Effective Field Goal * Seed", "Opponent Field Goal * Seed", "Steal Rate * Seed", "2 Point Percentage * Seed", "Opponent 2 Point Percent * Seed", 'Turnover Rate', 'Offensive Rebound Rate', 'Free Throw Rate', 'Turnover Rate * Seed', '3 Point Percentage', 'Defensive Efficiency * Seed', 'Power Rating * Seed', 'Offensive Rebound Rate * Seed', 'Opponent Off Rebound Rate * Seed' )
+sigcountdata2<- sigcountdata %>% mutate(renamedpred = renamed) %>% slice(2:nrow(sigcountdata))
+```
+
+```{r, echo=FALSE, fig.align='center'}
+#Graph with renamed
+sigcountdata2 %>% ggplot(mapping = aes(x = reorder(renamedpred, -Sigcount), y = Sigcount)) + 
+geom_bar(stat = "identity", fill = 'lightblue') + 
+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + labs(title = "Number of Rounds Each Predictor Was Used in the Initial Model", x = "Predictor", y = "Number of Rounds")
+```
+
+
+
+# RESULTS
+
+In our attempt to create a model that could accurately predict whether a team should win or lose in any given round, we wanted to first adjust the datasets so we could analyze the data in a round by round order. Therefore, to prevent teams that lost in an earlier round from influencing models that aim to find the likelihood of a team advancing to later rounds, we created separate datasets for each round that only included the teams that actually participated in said round. These separate datasets were created by filtering out the teams that had a 0 in the round’s win or loss column. This filtering approach created a logical and efficient progression that mirrors the structure of the tournament, ensuring that the datasets for each round only included teams that had successfully advanced to that point. This helps the model to learn from the performance of successful teams and make more accurate predictions about which teams are most likely to advance in future rounds. Let it also be noted that each dataset included every regular season statistic, as well as the binary outcome of the game.
+
+Our goal was to develop models that could accurately predict the likelihood of a team winning their game, which we represented as a percent chance between 0 and 1. Since the dependent variable is not continuous, but rather a binary one indicating either a win or loss, simple linear regression would not be an appropriate method for modeling this data. Attempting to identify  the most accurate modeling technique for our dataset, we compared binomial and Poisson regression using a generalized linear model. This initial analysis showed that binomial regression was more appropriate for our dataset, as it provided more accurate predictions of the binary outcome variable. Next, we began creating a comprehensive model to predict the results of the round of 64 using every available statistic in our round of 64 dataset. We utilized a Stepwise Akaike Information Criterion (StepAIC) selection method, which aimed to identify the most effective combination of predictors for our model by iteratively testing different model combinations and selecting the one with the lowest AIC value. This approach is extremely valuable because the AIC value not only takes into account the model's accuracy, but also its complexity, which is essential for identifying the most effective model.
+
+While we were highly impressed with the accuracy of our initial best model, we wanted to further explore potential interactions between certain variables, especially with respect to the seed and conference variables. We proposed the idea that teams in higher level conferences could have unique statistical profiles that might interact with the other variables. To test this hypothesis, we repeated the same Stepwise AIC process separately for both the conference (before realizing that we would no longer include this variable in our model) and seed as interactive variables. Our findings revealed that interacting variables with the conference variable did not significantly improve the accuracy of our models. However, including seed as an interactive variable with the rest of the singular season statistics substantially reduced the AIC value compared to our initial model. Therefore, an early find was that seed plays an important role in predicting the outcomes of a given tournament round, and its effects are influenced by other variables in our dataset. After developing the best model for the round of 64, we extended our analysis to other rounds of the tournament and repeated the modeling process. Our results continued to show that seed had a significant impact on the outcomes of each round, as it was consistently identified as an important interaction term in our models.
+
+Next, we needed to evaluate the performance of our models, so we incorporated a commonly accepted N-fold cross-validation technique. We began with our round of 64 model and installed a for-loop that used the N-folds (N representing the number of rows in each round’s dataset) that created training and testing data from our existing dataset using the folds. We applied this model to the training data and made predictions on the testing data. Upon completion of the loop, we recorded the models' predicted results in a separate column of the round’s dataset, which made it easier to compare the predictions and actual results side by side. We repeated this process for every round of the tournament, changing the N-folds to fit the number of rows of each dataset. By incorporating this N-fold cross-validation, we were able to generate more reliable results by reducing the impact of data variation and overfitting. Additionally, we were able to use a larger portion of our dataset for training and testing, resulting in more accurate assessments of each model's performance. These predicted results for each round were eventually used to calculate the sensitivity, specificity, and accuracy of our models.
+
+After finalizing our models, we wanted to compare them in terms of the difference between each round, including the importance of predictors and  the changes to sensitivity and specificity. As we progressed to higher rounds, we noticed that the size of individual coefficients increased. This was because each round had less predictors, which increased the importance of the selected predictors. While modeling these results, we noticed that early and later round predictors had significant differences in which variables the model deemed important. Due to these major differences, it was challenging to compare the raw variables directly. In order to make these differences easier to visualize, we manually created a new dataset in Excel that included each model’s unique predictors and coefficients, which was then downloaded as a csv file and read into R for analysis. To enhance the comparison between each round’s model, we took the log of the absolute value of each coefficient value, which effectively highlighted the differences in each of the round’s coefficients. The can be visually displayed in the following model:
+
+
+
+```{r, echo=FALSE, fig.align='center'}
+#Without PD
+predictionweight2 <- read.csv("predictionwithoutpd2.csv")
+gathereddata2 <- predictionweight2 %>% rename(Final.4 = Fi0l.4) %>% arrange(desc(Sigcount)) %>% slice(c(2:nrow(predictionweight2))) %>% gather(key = "Round", value = "Accuracy", 2:7, factor_key=T)
+
+gathereddata2$logAccuracy = log(abs(gathereddata2$Accuracy))
+
+gathereddata2new = gathereddata2 %>% mutate(
+  Predictor = ifelse(Predictor == "D_Efficiency:Seed", "Defensive Efficiency:Seed", ifelse(Predictor == "D_Efficiency", "Defensive Efficiency", ifelse(Predictor == "EFG_D", "Effective FG Percentage Allowed", ifelse(Predictor == "EFG_D:Seed", "Effective FG Percentage Allowed:Seed", ifelse(Predictor == "EFG_O", "Effective FG Percentage", ifelse(Predictor =="EFG_O:Seed", "Effective FG Percentage:Seed", ifelse(Predictor == "Free_Throw_Rate", "Free Throw Rate", ifelse(Predictor == "O_Efficiency", "Offensive Efficiency", ifelse(Predictor == "Offensive_Rebound_Rate:Seed", "Offensive Rebound Rate:Seed", ifelse(Predictor == "Opp_2_Pt_Percentage:Seed", "Opp 2pt Percentage:Seed", ifelse(Predictor == "Opp_Offensive_Rebound_Rate", "Opp Offensive Rebound Rate", ifelse(Predictor == "Opp_Offensive_Rebound_Rate:Seed", "Opp Offensive Rebound Rate:Seed", ifelse(Predictor == "Power_Rating", "Power Rating", ifelse(Predictor == "Power_Rating:Seed", "Power Rating:Seed", ifelse(Predictor == "Steal_Rate", "Steal Rate", ifelse(Predictor == "Steal_Rate:Seed", "Steal Rate:Seed", ifelse(Predictor == "Turnover_Rate", "Turnover Rate", ifelse(Predictor == "Turnover_Rate:Seed", "Turnover Rate:Seed", ifelse(Predictor == "Win_Percentage", "Win Percentage", ifelse(Predictor == "Win_Percentage:Seed", "Win Percentage:Seed", ifelse(Predictor == "Wins_Above_Bubble", "Wins Above Bubble", ifelse(Predictor == "X2_Pt_Percentage", "2pt Percentage", ifelse(Predictor == "X2_Pt_Percentage:Seed", "2pt Percentage:Seed", ifelse(Predictor == "X3_Pt_Percentage", "3pt Percentage", ifelse(Predictor == "X64PD", "Round of 64 PD", ifelse(Predictor == "X32PD", "Round of 32 PD", ifelse(Predictor == "X16PD", "Sweet 16 PD", ifelse(Predictor == "Seed:X64PD", "Round of 64 PD:Seed", ifelse(Predictor == "Seed:X32PD", "Round of 32 PD:Seed", ifelse(Predictor == "Wins", "Wins", ifelse(Predictor == "Seed", "Seed", ifelse(Predictor == "Offensive Rebound Rate", "Offensive Rebound Rate", ifelse(Predictor == "Wins:Seed", "Wins:Seed", Predictor))))))))))))))))))))))))))))))))))
+
+# create the plot
+gathereddata2new %>% ggplot(aes(x = Predictor, y = Round, fill = logAccuracy)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "lightblue", mid = "blue", high = "darkblue", na.value = "white", midpoint = 0, guide = "colorbar", aesthetics = "fill") +
+  xlab("Predictors") +
+  ylab("Models") +
+  ggtitle("Predictor Values by Model Without Point Differential") +
+  labs(fill = "Log of Coefficient Values") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
+
+
+We then created confusion matrices using each of the original models to determine the differences in sensitivity, specificity, and accuracy for each round. Sensitivity measures a model’s ability to predict true positives, and in our case, it accurately predicted a win when a team actually won. On the other hand, specificity measures a model’s ability to predict true negations, and in our case, it accurately predicted a loss when a team actually lost. Finally, accuracy measures the overall accuracy of a model to correct results, and in our case, it accurately predicts the correct outcome game by game. Interestingly, we did not observe any clear trend in any of the three measures as the rounds increased. The exact results can be found in the table below. From the table, it is clear that our most accurate model was the Elite 8’s model, which yielded the highest sensitivity and specificity, with a sensitivity of 89.29% and a specificity of 85.71%. On the other hand, our overall least accurate model was the Sweet 16’s model, with a sensitivity of 69.64% and a specificity of 67.86%.
+
+After reviewing the historical trends of past tournaments, these results were reasonable. Historically, we tend to see the majority of upsets happen during the first and second rounds of the tournament, which our models predicted relatively accurately. The Sweet 16 is generally the round where the higher seeded, more dominant teams begin to assert their dominance in the tournament. However, even though the majority of the upsets tend to happen in the earlier rounds, there are still several “Cinderella” teams each year that are able to defy the odds and make it past the Sweet 16. While understanding the nature of the tournament, it’s important to realize that the Sweet 16 is a shifting round because the competition level changes significantly from the previous rounds. As a result, predicting the outcome of each game in this particular round becomes more difficult, even for advanced Stepwise models. However, over the last three rounds of the tournament, our models were able to recover and predict the results at high rates, as seen in the following table:
+
+```{r, echo=FALSE}
+#Nicer tables for sensitivity, specificity and accuracy
+no.PD_nicer <- kable(sens_spec.no_PD, "html") %>%
+  kable_styling(full_width = FALSE, position = "center", latex_options = c("striped", "scale_down"), font_size = 12)
+
+no.PD_nicer
+```
+
+In our follow up question, we wanted to incorporate the previous round’s point differential in addition to the regular season statistics to determine whether or not it would impact our model’s accuracy. To do so, we manually created a second table, as discussed in the data section, that had the point difference for each game of the previous round. The idea behind this question was to see if understanding a team's momentum could increase the chances of accurately predicting the outcome in the next round. We repeated the same previously mentioned steps involving StepAIC, N-fold cross-validation, and then by comparison, we were able to accurately create new models for each round of the tournament using live data. While these models could not be used to predict the games before the tournament began, they serve as an interesting testimony to dominance or the lack thereof in the tournament. Once again, we found that the interactions with seed remained the most prominent factor in predicting the outcome of each round’s games. Once again, to enhance the comparison between each round’s model, we took the log of the absolute value of each coefficient value, and created the following tile plot:
+
+
+
+```{r, echo=FALSE, fig.align='center'}
+#final plot for the data with PD
+predictionweight <- read.csv("predictionwithpd.csv")
+
+gathereddata <- predictionweight %>% rename(Final.4 = Final.Four) %>% arrange(desc(Sigcount)) %>% slice(2:nrow(predictionweight)) %>% gather(key = "Round", value = "Accuracy", 2:7, factor_key=T) 
+
+gathereddata$logAccuracy = log(abs(gathereddata$Accuracy))
+
+gathereddatanew = gathereddata %>% mutate(
+  Predictor = ifelse(Predictor == "D_Efficiency:Seed", "Defensive Efficiency:Seed", ifelse(Predictor == "D_Efficiency", "Defensive Efficiency", ifelse(Predictor == "EFG_D", "Effective FG Percentage Allowed", ifelse(Predictor == "EFG_D:Seed", "Effective FG Percentage Allowed:Seed", ifelse(Predictor == "EFG_O", "Effective FG Percentage", ifelse(Predictor =="EFG_O:Seed", "Effective FG Percentage:Seed", ifelse(Predictor == "Free_Throw_Rate", "Free Throw Rate", ifelse(Predictor == "O_Efficiency", "Offensive Efficiency", ifelse(Predictor == "Offensive_Rebound_Rate:Seed", "Offensive Rebound Rate:Seed", ifelse(Predictor == "Opp_2_Pt_Percentage:Seed", "Opp 2pt Percentage:Seed", ifelse(Predictor == "Opp_Offensive_Rebound_Rate", "Opp Offensive Rebound Rate", ifelse(Predictor == "Opp_Offensive_Rebound_Rate:Seed", "Opp Offensive Rebound Rate:Seed", ifelse(Predictor == "Power_Rating", "Power Rating", ifelse(Predictor == "Power_Rating:Seed", "Power Rating:Seed", ifelse(Predictor == "Steal_Rate", "Steal Rate", ifelse(Predictor == "Steal_Rate:Seed", "Steal Rate:Seed", ifelse(Predictor == "Turnover_Rate", "Turnover Rate", ifelse(Predictor == "Turnover_Rate:Seed", "Turnover Rate:Seed", ifelse(Predictor == "Win_Percentage", "Win Percentage", ifelse(Predictor == "Win_Percentage:Seed", "Win Percentage:Seed", ifelse(Predictor == "Wins_Above_Bubble", "Wins Above Bubble", ifelse(Predictor == "X2_Pt_Percentage", "2pt Percentage", ifelse(Predictor == "X2_Pt_Percentage:Seed", "2pt Percentage:Seed", ifelse(Predictor == "X3_Pt_Percentage", "3pt Percentage", ifelse(Predictor == "X64PD", "Round of 64 PD", ifelse(Predictor == "X32PD", "Round of 32 PD", ifelse(Predictor == "X16PD", "Sweet 16 PD", ifelse(Predictor == "Seed:X64PD", "Round of 64 PD:Seed", ifelse(Predictor == "Seed:X32PD", "Round of 32 PD:Seed", ifelse(Predictor == "Wins", "Wins", ifelse(Predictor == "Seed", "Seed", ifelse(Predictor == "Offensive Rebound Rate", "Offensive Rebound Rate", ifelse(Predictor == "Wins:Seed", "Wins:Seed", Predictor))))))))))))))))))))))))))))))))))
+  
+
+  
+#factor variable in order to reorganize
+gathereddatanew$Predictor <- factor(gathereddatanew$Predictor, levels = c("Defensive Efficiency", "Defensive Efficiency:Seed", "Effective FG Percentage Allowed", "Effective FG Percentage Allowed:Seed", "Effective FG Percentage", "Effective FG Percentage:Seed", "Free Throw Rate", "Offensive Efficiency", "Offensive Rebound Rate", "Offensive Rebound Rate:Seed", "Opp 2pt Percentage:Seed", "Opp Offensive Rebound Rate", "Opp Offensive Rebound Rate:Seed", "Power Rating", "Power Rating:Seed", "Seed", "Steal Rate", "Steal Rate:Seed", "Turnover Rate", "Turnover Rate:Seed", "Win Percentage", "Win Percentage:Seed", "Wins", "Wins:Seed", "Wins Above Bubble", "2pt Percentage", "2pt Percentage:Seed", "3pt Percentage", "Round of 64 PD", "Round of 32 PD", "Sweet 16 PD", "Round of 64 PD:Seed", "Round of 32 PD:Seed"))
+# create the plot
+gathereddatanew %>% ggplot(aes(x = Predictor, y = Round, fill = logAccuracy)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "lightblue", mid = "blue", high = "darkblue", na.value = "white", midpoint = 0, guide = "colorbar", aesthetics = "fill") +
+  xlab("Predictors") +
+  ylab("Models") +
+  ggtitle("Predictor Values by Model With Point Differential") +
+  labs(fill = "Log of Coefficient Values") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
+
+
+From this visual, it is evident that the models utilizing point differential appeared very similar to the original models in the earlier rounds, but began to alter around the Elite 8 round. Furthermore, our analysis proved that the importance of the point differential statistics increased with the tournament’s progression,  indicating that momentum can have a significant impact on predicting the outcomes of later rounds. As each round progressed, we incorporated  the additional point differential statistic. With the addition of each round’s live statistics, we were able to understand the changing nature of the tournament and realized the importance of various factors in determining each round’s results. While point differential might not be important in earlier rounds, a good performance in a previous round can still have an impact on a team’s performance in the rounds to come. Thus, the skew in model similarity in the later rounds can be attributed to the buildup of the new live variables.
+
+Once again, we created confusion matrices using each of the updated models to determine the differences in sensitivity, specificity, and accuracy for each round. The following table highlights the results:
+
+```{r, echo=FALSE}
+#Nicer tables for sensitivity, specificity and accuracy
+with.PD_nicer <- kable(sens_spec.with_PD, "html") %>%
+  kable_styling(full_width = FALSE, position = "center", latex_options = c("striped", "scale_down"), font_size = 12)
+
+with.PD_nicer
+```
+
+Based on these results, we found that the models utilizing round by round point differentials had extremely similar results to the previous models that only included regular season statistics. Once again, we didn’t find a notable trend in sensitivity, specificity, or accuracy. While the Elite 8 remained the most accurate model, with a sensitivity value of 82.14% and a specificity value of 89.29%. However, adding the point differentials of each round caused the Final 4 to replace the Sweet 16 as the round with the least accurate model, with a sensitivity value of 64.29% and a specificity value of 64.29% In order to help visualize the differences between the models with and without the point differentials, we created the following visual:
+
+
+
+```{r, echo=FALSE, fig.align='center'}
+#Graphs
+no.PD_plot <- ggplot(sens_spec.no_PD, aes(x = Round)) +
+  geom_line(aes(y = Accuracy, color = "Accuracy")) +
+  geom_line(aes(y = Sensitivity, color = "Sensitivity")) +
+  geom_line(aes(y = Specificity, color = "Specificity")) +
+  scale_color_manual(values = c("Accuracy" = "blue", "Sensitivity" = "red", "Specificity" = "#006000")) +
+  labs(x = "Round", y = "Value") + scale_x_continuous(breaks = sens_spec.no_PD$Round, trans = "reverse") +
+  ggtitle("Change in Accuracy, Sensitivity and Specificity Over Each Round (No XPD)")
+
+
+with.PD_plot <- ggplot(sens_spec.with_PD, aes(x = Round, y = Accuracy)) +
+  geom_line(aes(color = "Accuracy")) +
+  geom_line(aes(x = Round, y = Sensitivity, color = "Sensitivity")) +
+  geom_line(aes(x = Round, y = Specificity, color = "Specificity")) +
+  scale_color_manual(values = c("Accuracy" = "blue", "Sensitivity" = "red", "Specificity" = "#006000")) +
+  labs(x = "Round", y = "Value") + scale_x_continuous(breaks = sens_spec.with_PD$Round, trans = "reverse") +
+  ggtitle("Change in Accuracy, Sensitivity and Specificity Over Each Round (With XPD)") 
+
+grid.arrange(no.PD_plot, with.PD_plot)
+```
+
+
+
+As seen in this visual, our sensitivity, specificity, and accuracy values were relatively accurate given how many variables, interactive variables, and number of games our model was tasked to predict. We found that for all but the championship round, the models that didn’t include point differential were better at predicting a team’s true positives, or in our case, the games where a team was both predicted to win and did in fact win, rather than the games where a team was predicted to lose and did actually lose. Overall, our round by round models that didn’t include point differential had an average sensitivity value of 74.55%, an average specificity value of 79.76%, and an average accuracy rating of 77.16%. We found that for all but the first two rounds, the models that included point differential were better at predicting a team’s true negatives, or in our case, the games where a team was predicted to lose and did actually lose, rather than the games where a team was predicted to win and did actually win. Overall, our round by round models that included point differential had an average sensitivity value of 72.74%, an average specificity value of 79.32%, and an average accuracy rating of 76.03%. Given these results, it turned out that the combined models, which only used the team’s regular season statistics, were 1.13% more accurate than the models that also used the round by round point differentials. This result lead us to believe that a team’s active performance in a given round does not hold as much significance as their overall regular season performance.
+
+# CONCLUSION
+
+Will the 2023-2024 Tar Heels bounce back after a historically defeating season? While it’s impossible to determine that answer right now, in less than a year, when we are getting ready to fill out our brackets, we will be able to use their regular season statistics to generate a great prediction. The idea of creating a round by round model that aimed to accurately predict the outcome of a given men’s NCAA March Madness tournament stemmed from our curiosity of what statistical attributes enable a team to win a national championship. After finding an online dataset on the tournament ranging from 2013 to 2019, manually searching and entering the outcomes of each round, and devising a Stepwise analysis on the regular season statistics, we were able to accomplish our initial goal of creating a model to help us understand which variables are the most important for winning any given round of the tournament.
+
+Encouraged by our initial models, we wanted to see if it was possible to take our models a step further. Therefore, we introduced live tournament results through the incorporation of round by round point differentials for each game. After repeating a similar process with these new variables, we got similar but marginally less significant sensitivity, specificity, and average accuracy values. While the values didn’t increase as we had initially expected, it highlighted the importance of a team’s performance in the regular season. Despite our models' impressive ability to predict team outcomes, there are still opportunities to refine and optimize their performance in the future. Introducing more variables such as individual player statistics, coaching strategies, and a team’s rotational data from past seasons could provide our StepAIC function with additional data to cross-validate and produce even more precise results. Additionally, incorporating more years of data would increase the model’s sample size and, in turn, increase its accuracy.
+
+Overall, our approach marks a significant advancement in NCAA March Madness tournament prediction, as we have successfully combined statistical analysis and machine learning techniques to create highly accurate models for predicting team performance and tournament outcomes. These models have the potential to benefit sports analysts, sports fans, and tournament organizers by providing them with better informed insights for future tournaments. While our model is currently engineered for the men's NCAA tournament, it has the potential to be easily modified and refined to suit any sports competition worldwide.
+
+# Citations
+
+National Collegiate Athletic Association. “Browse Every NCAA Bracket since 1939 with Stats and Records.” NCAA.com, NCAA.com, 16 Mar. 2021, https://www.ncaa.com/basketball-men/d1/every-ncaa-bracket-1939-today-tournament-stats-records.
+
+Sundberg, Andrew. “College Basketball Dataset.” Kaggle, 16 Mar. 2021, https://www.kaggle.com/datasets/andrewsundberg/college-basketball-dataset.
+
+
+
+
+
+
+
